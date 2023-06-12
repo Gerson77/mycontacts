@@ -14,7 +14,7 @@ class CategoryController {
     }
 
     const category = await CategoriesRepository.create({ name });
-    return response.json(category);
+    return response.status(201).json(category);
   }
 }
 

@@ -6,7 +6,7 @@ class ContactsRepository {
     const rows = await db.query(`
     SELECT contacts.*, categories.name AS category_name
     FROM contacts
-    INNER JOIN categories ON categories.id = contacts.category_id
+    LEFT JOIN categories ON categories.id = contacts.category_id
     ORDER BY contacts.name ${direction}`);
     return rows;
   }

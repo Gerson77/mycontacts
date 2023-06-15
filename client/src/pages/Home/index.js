@@ -43,7 +43,7 @@ export default function Home() {
         setContacts(contactsList);
       } catch (error) {
         // eslint-disable-next-line
-        console.log('Error', error);
+        console.log(error);
       } finally {
         setIsLoading(false);
       }

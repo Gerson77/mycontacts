@@ -13,7 +13,6 @@
       1, { "extensions": [".js", ".jsx"]}
     ],
     "react/react-in-jsx-scope": "off",
-    "react/jsx-no-bind": "off",
     "import/prefer-default-export": "off"
   }
 }

@@ -12,9 +12,12 @@ export default function NewContact() {
         phone: formData.phone,
         category_id: formData.categoryId,
       };
+
       const response = await ContactService.createContacts(contact);
+      // eslint-disable-next-line no-console
       console.log(response);
     } catch {
+      // eslint-disable-next-line no-alert
       alert('Ocorreu um erro');
     }
   }

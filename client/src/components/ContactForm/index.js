@@ -1,6 +1,8 @@
 /* eslint-disable react/jsx-no-bind */
 import PropTypes from 'prop-types';
-import { useEffect, useState } from 'react';
+import {
+  forwardRef, useEffect, useImperativeHandle, useState,
+} from 'react';
 
 import isEmailValid from '../../utils/isEmailValid';
 import formatPhone from '../../utils/isPhoneValid';
@@ -14,7 +16,7 @@ import Input from '../Input';
 import Select from '../Select';
 import Button from '../Button';
 
-export default function ContactForm({ buttonLabel, onSubmit }) {
+const ContactForm = forwardRef(({ buttonLabel, onSubmit }, ref) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -27,14 +29,24 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
     setError, removeError, getErrorMessageByFieldName, errors,
   } = useErrors();
 
-  const isFormValid = (name && errors.length === 0);
+  const isFormValid = name && errors.length === 0;
+
+  useImperativeHandle(ref, () => ({
+    setFieldsValues: (contact) => {
+      setName(contact.name ?? '');
+      setEmail(contact.email ?? '');
+      setPhone(formatPhone(contact.phone ?? ''));
+      setCategoryId(contact.category_id ?? '');
+    },
+  }), []);
 
   useEffect(() => {
     async function loadCategories() {
       try {
         const categoriesList = await CategoryService.listCategories();
         setCategories(categoriesList);
-      } catch {} finally {
+      } catch {
+      } finally {
         setIsLoadingCategories(false);
       }
     }
@@ -71,7 +83,10 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
     setIsSubmitting(true);
 
     await onSubmit({
-      name, email, phone, categoryId,
+      name,
+      email,
+      phone,
+      categoryId,
     });
 
     setIsSubmitting(false);
@@ -116,10 +131,7 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
         >
           <option value="">Selecione a categoria *</option>
           {categories.map((category) => (
-            <option
-              key={category.id}
-              value={category.id}
-            >
+            <option key={category.id} value={category.id}>
               {category.name}
             </option>
           ))}
@@ -133,9 +145,11 @@ export default function ContactForm({ buttonLabel, onSubmit }) {
       </ButtonContainer>
     </Form>
   );
-}
+});
 
 ContactForm.propTypes = {
   buttonLabel: PropTypes.string.isRequired,
   onSubmit: PropTypes.func.isRequired,
 };
+
+export default ContactForm;

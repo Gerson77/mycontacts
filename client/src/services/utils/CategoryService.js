@@ -5,7 +5,7 @@ class CategoryService {
     this.httpClient = new HttpClient(`${process.env.REACT_APP_URL_API}`);
   }
 
-  async listCategories() {
+  listCategories() {
     return this.httpClient.get('/categories');
   }
 }

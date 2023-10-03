@@ -20,7 +20,10 @@ export default function useContactForm(onSubmit, ref) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
-    setError, removeError, getErrorMessageByFieldName, errors,
+    setError,
+    removeError,
+    getErrorMessageByFieldName,
+    errors,
   } = useErrors();
 
   const isFormValid = name && errors.length === 0;

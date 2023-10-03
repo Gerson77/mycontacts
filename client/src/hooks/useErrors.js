@@ -14,7 +14,7 @@ export default function useErrors() {
     ]);
   }, [errors]);
 
-  const removeError = ((fieldName) => {
+  const removeError = useCallback((fieldName) => {
     setErros((prevState) => prevState.filter(
       (error) => error.field !== fieldName,
     ));

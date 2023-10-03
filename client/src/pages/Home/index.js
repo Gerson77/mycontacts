@@ -1,8 +1,6 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 import { Link } from 'react-router-dom';
-import {
-  useCallback, useEffect, useMemo, useState,
-} from 'react';
+
 import {
   Container,
   Header,
@@ -25,89 +23,26 @@ import Loader from '../../components/Loader';
 import Button from '../../components/Button';
 import Modal from '../../components/Modal';
 
-import ContactService from '../../services/utils/ContactService';
-import toast from '../../utils/toast';
+import useHome from './useHome';
 
 export default function Home() {
-  const [contacts, setContacts] = useState([]);
-  const [orderBy, setOrderBy] = useState('asc');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-  const [contactBeingDeleted, setContactBeingDelete] = useState(null);
-  const [isLiadingDelete, setIsLoadingDelete] = useState(false);
-
-  const filteredContacts = useMemo(() => contacts.filter((contact) => (
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )), [contacts, searchTerm]);
-
-  function handleToggleOrderBy() {
-    setOrderBy((prevState) => (prevState === 'asc' ? 'desc' : 'asc'));
-  }
-
-  function handleChangeSearchTerm(event) {
-    setSearchTerm(event.target.value);
-  }
-
-  const loadContacts = useCallback(async () => {
-    setIsLoading(true);
-
-    try {
-      setIsLoading(false);
-      const contactsList = await ContactService.listContacts(orderBy);
-
-      setHasError(false);
-      setContacts(contactsList);
-    } catch {
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [orderBy]);
-
-  useEffect(() => {
-    loadContacts();
-  }, [loadContacts]);
-
-  function handleTryAgain() {
-    loadContacts();
-  }
-
-  function handleDeleteContact(contact) {
-    setContactBeingDelete(contact);
-    setIsDeleteModalVisible(true);
-  }
-
-  function handleCloseDelete() {
-    setIsDeleteModalVisible(false);
-    setContactBeingDelete(null);
-  }
-
-  async function handleConfirmDeletedContact() {
-    try {
-      setIsLoadingDelete(true);
-      await ContactService.deleteContact(contactBeingDeleted.id);
-
-      setContacts((prevState) => prevState.filter(
-        (contact) => contact.id !== contactBeingDeleted.id,
-      ));
-
-      handleCloseDelete();
-
-      toast({
-        type: 'success',
-        text: 'Contato deletado com sucesso!',
-      });
-    } catch {
-      toast({
-        type: 'danger',
-        text: 'Ocorreu um erro ao deletadar o contato!',
-      });
-    } finally {
-      setIsLoadingDelete(false);
-    }
-  }
+  const {
+    isLoading,
+    isLoadingDelete,
+    isDeleteModalVisible,
+    contactBeingDeleted,
+    handleCloseDelete,
+    handleConfirmDeletedContact,
+    contacts,
+    searchTerm,
+    handleChangeSearchTerm,
+    hasError,
+    handleDeleteContact,
+    filteredContacts,
+    handleTryAgain,
+    orderBy,
+    handleToggleOrderBy,
+  } = useHome();
 
   return (
     <Container>
@@ -115,7 +50,7 @@ export default function Home() {
 
       <Modal
         danger
-        isLoading={isLiadingDelete}
+        isLoading={isLoadingDelete}
         visible={isDeleteModalVisible}
         title={`Tem certeza que deseja remover o contato "${contactBeingDeleted?.name}"?`}
         confirmLabel="Deletar"
@@ -140,14 +75,12 @@ export default function Home() {
           // eslint-disable-next-line no-nested-ternary
           hasError
             ? 'flex-end'
-            : (
-              contacts.length > 0
-                ? 'space-between'
-                : 'center'
-            )
+            : contacts.length > 0
+              ? 'space-between'
+              : 'center'
         }
       >
-        {(!hasError && contacts.length > 0) && (
+        {!hasError && contacts.length > 0 && (
           <strong>
             {filteredContacts.length}
             {filteredContacts.length === 1 ? ' contato' : ' contatos'}
@@ -161,44 +94,49 @@ export default function Home() {
           <img src={sad} alt="sad" />
           <div className="details">
             <strong>Ocorreu um erro ao obter os seus contatos!</strong>
-            <Button type="button" onClick={() => handleTryAgain()}>Tentar novamente</Button>
+            <Button type="button" onClick={() => handleTryAgain()}>
+              Tentar novamente
+            </Button>
           </div>
         </ErrorContainer>
       )}
 
       {!hasError && (
         <>
-          {(contacts.length < 1 && !isLoading) && (
-          <EmptyListContainer>
-            <img src={emptyBox} alt="emptyBox" />
-            <p>
-              Você ainda não tem nenhum contato cadastrado!
-              Clique no botão <strong>”Novo contato”</strong> à cima
-              para cadastrar o seu primeiro!
-            </p>
-          </EmptyListContainer>
+          {contacts.length < 1 && !isLoading && (
+            <EmptyListContainer>
+              <img src={emptyBox} alt="emptyBox" />
+              <p>
+                Você ainda não tem nenhum contato cadastrado! Clique no botão{' '}
+                <strong>”Novo contato”</strong> à cima para cadastrar o seu
+                primeiro!
+              </p>
+            </EmptyListContainer>
           )}
 
-          {(contacts.length > 0 && filteredContacts.length < 1) && (
+          {contacts.length > 0 && filteredContacts.length < 1 && (
             <SearchNotFoundContainer>
               <img src={magnifierQuestion} alt="magnifierQuestion" />
-              <span>Nenhum resultado foi encontrado para <strong>”{searchTerm}”</strong>.</span>
+              <span>
+                Nenhum resultado foi encontrado para{' '}
+                <strong>”{searchTerm}”</strong>.
+              </span>
             </SearchNotFoundContainer>
           )}
 
           {filteredContacts.length > 0 && (
-          <ListHeader orderBy={orderBy}>
-            <header>
-              <button
-                onClick={handleToggleOrderBy}
-                type="button"
-                className="sort-button"
-              >
-                <span>Nome</span>
-                <img src={arrow} alt="arrow" />
-              </button>
-            </header>
-          </ListHeader>
+            <ListHeader orderBy={orderBy}>
+              <header>
+                <button
+                  onClick={handleToggleOrderBy}
+                  type="button"
+                  className="sort-button"
+                >
+                  <span>Nome</span>
+                  <img src={arrow} alt="arrow" />
+                </button>
+              </header>
+            </ListHeader>
           )}
 
           {filteredContacts.map((contact) => (
@@ -206,7 +144,9 @@ export default function Home() {
               <div className="info">
                 <div className="contact-name">
                   <strong>{contact.name}</strong>
-                  {contact.category.name && <small>{contact.category.name}</small>}
+                  {contact.category.name && (
+                    <small>{contact.category.name}</small>
+                  )}
                 </div>
                 <span>{contact.email}</span>
                 <span>{contact.phone}</span>
@@ -217,11 +157,11 @@ export default function Home() {
                   <img src={edit} alt="editar" />
                 </Link>
 
-                <button type="button" onClick={() => handleDeleteContact(contact)}>
-                  <img
-                    src={trash}
-                    alt="deletar"
-                  />
+                <button
+                  type="button"
+                  onClick={() => handleDeleteContact(contact)}
+                >
+                  <img src={trash} alt="deletar" />
                 </button>
               </div>
             </Card>

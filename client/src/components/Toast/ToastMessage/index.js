@@ -1,17 +1,31 @@
 /* eslint-disable react/jsx-no-bind */
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Container } from './styles';
 
 import xCircleIcon from '../../../assets/images/icons/x-circle.svg';
 import checkCircleIcon from '../../../assets/images/icons/check-circle.svg';
 
 export default function ToastMessage({
-  message, onRemoveMessage,
+  message, onRemoveMessage, isLeaving, onAnimationEnd,
 }) {
-  function handleRemoveToast() {
-    onRemoveMessage(message.id);
-  }
+  const animatedElementRef = useRef(null);
+
+  useEffect(() => {
+    function handleAnimationEnd() {
+      onAnimationEnd(message.id);
+    }
+
+    const elementRef = animatedElementRef.current;
+
+    if (isLeaving) {
+      elementRef.addEventListener('animationend', handleAnimationEnd);
+    }
+
+    return () => {
+      elementRef.removeEventListener('animationend', handleAnimationEnd);
+    };
+  }, [isLeaving, message.id, onAnimationEnd]);
 
   useEffect(() => {
     const timeOutId = setTimeout(() => {
@@ -23,12 +37,18 @@ export default function ToastMessage({
     };
   }, [message, onRemoveMessage]);
 
+  function handleRemoveToast() {
+    onRemoveMessage(message.id);
+  }
+
   return (
     <Container
       type={message.type}
       onClick={handleRemoveToast}
       tabIndex={0}
       role="button"
+      isLeaving={isLeaving}
+      ref={animatedElementRef}
     >
       {message.type === 'danger' && <img src={xCircleIcon} alt="x" /> }
       {message.type === 'success' && <img src={checkCircleIcon} alt="check" /> }
@@ -45,5 +65,7 @@ ToastMessage.propTypes = {
     duration: PropTypes.number,
   }).isRequired,
 
+  isLeaving: PropTypes.bool.isRequired,
   onRemoveMessage: PropTypes.func.isRequired,
+  onAnimationEnd: PropTypes.func.isRequired,
 };

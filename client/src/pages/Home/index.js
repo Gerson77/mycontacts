@@ -56,10 +56,10 @@ export default function Home() {
       {hasContacts && (
         <>
           <ContactList
+            filteredContacts={filteredContacts}
             orderBy={orderBy}
             onToggleOrderBy={handleToggleOrderBy}
             onDeleteContact={handleDeleteContact}
-            filteredContacts={filteredContacts}
           />
 
           <Modal

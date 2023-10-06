@@ -45,7 +45,7 @@ export const Container = styled.div`
   cursor: pointer;
   animation: ${massageIn} 0.3s;
 
-  ${({ isLeaving }) => isLeaving && css`animation: ${massageOut} 0.2s;`}
+  ${({ isLeaving }) => isLeaving && css`animation: ${massageOut} 0.2s forwards;`}
 
   ${({ type }) => containerVariants[type] || containerVariants.default}
 

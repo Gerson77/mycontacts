@@ -4,8 +4,8 @@ import GlobalStyles from '../../assets/styles/global';
 import defaultTheme from '../../assets/styles/themes/default';
 import { Container } from './styles';
 import Header from '../Header';
-import Routes from '../../Routes';
 import ToastContainer from '../Toast/ToastContainer';
+import Router from '../../Router';
 
 function App() {
   return (
@@ -15,7 +15,7 @@ function App() {
         <ToastContainer />
         <Container>
           <Header />
-          <Routes />
+          <Router />
         </Container>
       </ThemeProvider>
     </BrowserRouter>
